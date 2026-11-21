@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "com.xuanfei.prccompat.mixin.PrcMixinPlugin",
   "client": [
-    "RealCameraCoreMixin"
+    "RealCameraCoreMixin",
+    "ModConfigMixin"
   ],
   "injectors": {
     "defaultRequire": 1

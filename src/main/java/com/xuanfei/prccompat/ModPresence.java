@@ -45,6 +45,11 @@ public final class ModPresence {
         return punchyMoves;
     }
 
+    private static boolean active() {
+        refresh();
+        return CompatConfig.onlyWhenPunchyInstalled() ? punchy : punchy || punchyMoves;
+    }
+
     /**
      * Called from the Real Camera mixin. Returning true means "pretend Real Camera is not rendering the body".
      */
@@ -53,14 +58,31 @@ public final class ModPresence {
             return false;
         }
 
-        refresh();
-        boolean active = CompatConfig.onlyWhenPunchyInstalled() ? punchy : punchy || punchyMoves;
+        boolean active = active();
         if (active && !logged) {
             logged = true;
             LOGGER.info("[Punchy x Real Camera] Hiding Real Camera's first-person body mesh (Punchy={}, Moves={})",
                     punchy, punchyMoves);
         }
         return active;
+    }
+
+    /**
+     * Real Camera's binding target list is filtered by the skin texture ID. Custom skin
+     * mods change that ID, so an otherwise valid player-head mesh silently produces no
+     * bind result. This opt-in loosens only the texture-ID filter, not the UV matching.
+     */
+    public static boolean shouldLooseMatchBindTargets() {
+        return CompatConfig.looseTextureMatching() && anyPunchyLoaded();
+    }
+
+    public static boolean shouldLogBindDiagnostics() {
+        return CompatConfig.logBindDiagnostics() && anyPunchyLoaded();
+    }
+
+    private static boolean anyPunchyLoaded() {
+        refresh();
+        return punchy || punchyMoves;
     }
 
     private ModPresence() {

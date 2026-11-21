@@ -4,8 +4,8 @@ Environment: Linux x86_64, Temurin JDK 21.0.13, Gradle 8.14.2, NeoForge 21.1.267
 
 ## What was verified
 
-- `javac --release 21` compiles all five source files without errors (manual classpath: NeoForge universal, FancyModLoader loader, mergetool, Mixin 0.8.7, ASM tree, slf4j).
-- `build-manual.sh` reproduces `build/libs/prccompat-1.0.0.jar` from a clean output directory.
+- `javac --release 21` compiles all seven source files without errors (manual classpath: NeoForge universal, FancyModLoader loader, mergetool, Mixin 0.8.7, ASM tree, slf4j).
+- `build-manual.sh` reproduces `build/libs/prccompat-1.1.0alpha.jar` from a clean output directory.
 - `prccompat.mixins.json`, `pack.mcmeta`, and `META-INF/neoforge.mods.toml` parse successfully.
 - `PrcMixinPlugin.shouldApplyMixin` returns `false` without Real Camera on the classpath and `true` with `realcamera-1.21.1-neoforge-0.7.8-beta.jar` present.
 - `RealCameraCore.isRendering()` exists with signature `public static boolean isRendering()` in Real Camera 0.7.8-beta, so the target descriptor `isRendering()Z` is correct.

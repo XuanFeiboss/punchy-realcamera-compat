@@ -28,7 +28,7 @@ Real Camera 在第一人称下会做两件事：
 1. Minecraft **1.21.1** + **NeoForge 21.1.229 或更高**；
 2. 安装 **Real Camera 0.7.x**（1.21.1 NeoForge）；
 3. 安装 **Punchy! Moves 1.0.x**，可选再装 **Punchy! 3.x**；
-4. 把本模组的 `prccompat-1.0.0.jar` 放进 `mods`。
+4. 把本模组的 `prccompat-1.1.0alpha.jar` 放进 `mods`。
 
 本模组是纯客户端模组，服务器不需要安装。
 
@@ -42,14 +42,20 @@ Real Camera 在第一人称下会做两件事：
     hideRealCameraBody = true
     # Only hide the body when the first-person Punchy! mod is present.
     onlyWhenPunchyInstalled = false
+    # Retry bind targets without the skin texture-ID filter when CustomSkinLoader / ETF changes the texture ID.
+    looseTextureMatching = true
+    # Log the first few unmatched skin texture IDs.
+    logBindDiagnostics = true
 ```
 
 - `hideRealCameraBody = false`：恢复 Real Camera 原本的第一人称身体渲染（冲突也会回来，仅用于对照测试）。
 - `onlyWhenPunchyInstalled = true`：只在装有 Punchy! 本体时隐藏；只装 Moves 时保留 Real Camera 的身体。
+- `looseTextureMatching = false`：关闭宽松纹理匹配，恢复 Real Camera 原本按纹理 ID 选择绑定目标的行为。
+- `logBindDiagnostics = false`：关闭不匹配纹理 ID 的日志。
 
 ## 验证状态
 
-- `javac --release 21` 全量编译通过，`build/libs/prccompat-1.0.0.jar` 由 `build-manual.sh` 生成。
+- `javac --release 21` 全量编译通过，`build/libs/prccompat-1.1.0alpha.jar` 由 `build-manual.sh` 生成。
 - Mixin 插件检测已单测：不在类路径上放 Real Camera 时返回 `false`，放上 `realcamera-1.21.1-neoforge-0.7.8-beta.jar` 后返回 `true`。
 - 构建机没有图形环境，未启动 Minecraft 客户端做实机验证；首次进游戏建议先看日志里的 `[Punchy x Real Camera]` 行是否出现。
 
@@ -69,7 +75,7 @@ export JAVA_HOME=/path/to/jdk-21
 ./gradlew build
 ```
 
-产物：`build/libs/prccompat-1.0.0.jar`。
+产物：`build/libs/prccompat-1.1.0alpha.jar`。
 
 本仓库开发时使用了 Gradle 8.14.2 和 ModDevGradle 2.0.148；`neo_version` 在 `gradle.properties` 中，默认 `21.1.267`。
 
@@ -80,7 +86,7 @@ export JAVA_HOME=/path/to/jdk-21
 ./build-manual.sh
 ```
 
-它只取 NeoForge universal、FancyModLoader、Mixin、ASM、slf4j 这几个编译期依赖，用 `javac --release 21` 直接出 jar；本仓库的 `prccompat-1.0.0.jar` 就是用它构建的。
+它只取 NeoForge universal、FancyModLoader、Mixin、ASM、slf4j 这几个编译期依赖，用 `javac --release 21` 直接出 jar；本仓库的 `prccompat-1.1.0alpha.jar` 就是用它构建的。
 
 ## 代码结构
 
@@ -88,10 +94,22 @@ export JAVA_HOME=/path/to/jdk-21
 src/main/java/com/xuanfei/prccompat/
 ├── PunchyRealCameraCompat.java   # Mod 入口，注册客户端配置
 ├── ModPresence.java              # 检测 punchy / punchy_moves，缓存结果
-├── config/CompatConfig.java      # hideRealCameraBody / onlyWhenPunchyInstalled
+├── BindTargetFallback.java       # 反射读取 Real Camera 绑定目标 + 诊断日志
+├── config/CompatConfig.java      # 四个客户端配置项
 └── mixin/
     ├── RealCameraCoreMixin.java  # 关键注入：isRendering() -> false
+    ├── ModConfigMixin.java       # 纹理 ID 不匹配时回退到已配置绑定目标
     └── PrcMixinPlugin.java       # Real Camera 不存在时不应用 Mixin
+```
+
+## 绑定失败的处理
+
+Real Camera 先按渲染出的皮肤纹理 ID 过滤绑定目标，再在捕获到的顶点里找头部 UV。`CustomSkinLoader`、`Entity Texture Features` 等模组可能给同一个标准皮肤换成别的纹理 ID，结果目标列表为空，`computeCamera` 连续几帧拿不到结果后就报“绑定失败”。
+
+`ModConfigMixin` 只在这个列表为空时绕过纹理 ID 过滤，重新尝试配置里的绑定目标；UV 匹配和顶点捕获不变，所以相机仍然跟随真实渲染的头部，而不是退回固定相机。日志里出现下面这行就表示该分支被触发：
+
+```text
+[Punchy x Real Camera] No configured bind target matches skin texture '...'
 ```
 
 ## 设计说明
