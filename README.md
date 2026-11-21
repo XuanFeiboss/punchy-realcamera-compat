@@ -1,5 +1,7 @@
 # Punchy! × Real Camera Compat
 
+**本仓库代码由 AI 全部编写。**
+
 一个面向 **Minecraft 1.21.1 / NeoForge** 的客户端兼容补丁，用于解决 **Real Camera** 与 **Punchy! / Punchy! Moves** 在第一人称下的冲突。
 
 ## 它解决什么问题
