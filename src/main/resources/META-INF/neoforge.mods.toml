@@ -1,0 +1,57 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "MIT"
+
+[[mods]]
+modId = "prccompat"
+version = "${file.jarVersion}"
+displayName = "Punchy! x Real Camera Compat"
+authors = "XuanFei"
+description = '''
+A small client-side bridge between Real Camera and Punchy! / Punchy! Moves.
+
+Real Camera draws the player model in first person and cancels vanilla first-person hands.
+That clashes with Punchy!'s animated arms and with the body pose Punchy! Moves applies.
+This mod keeps Real Camera's camera binding but skips its visible first-person body pass,
+so Real Camera's camera still follows the animated head while Punchy!'s hands render normally.
+'''
+
+displayTest = "IGNORE_ALL_VERSION"
+
+[[mixins]]
+config = "prccompat.mixins.json"
+
+[[dependencies.prccompat]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.229,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.prccompat]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1, 1.21.2)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.prccompat]]
+modId = "realcamera"
+type = "optional"
+versionRange = "[0.7.0,)"
+ordering = "AFTER"
+side = "CLIENT"
+
+[[dependencies.prccompat]]
+modId = "punchy_moves"
+type = "optional"
+versionRange = "[1.0.0,)"
+ordering = "AFTER"
+side = "CLIENT"
+
+[[dependencies.prccompat]]
+modId = "punchy"
+type = "optional"
+versionRange = "[3.0.0,)"
+ordering = "AFTER"
+side = "CLIENT"

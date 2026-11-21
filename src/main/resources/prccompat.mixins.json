@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.xuanfei.prccompat.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "com.xuanfei.prccompat.mixin.PrcMixinPlugin",
+  "client": [
+    "RealCameraCoreMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
